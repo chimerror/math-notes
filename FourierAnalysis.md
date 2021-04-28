@@ -9,7 +9,6 @@ others. It assumes very little pre-knowledge, but also does not go too deeply in
 well known. These topics will be covered in sections with the title "generally", to signal that it is a very brief
 overview.
 
-
 Numbers, Generally
 ------------------
 
