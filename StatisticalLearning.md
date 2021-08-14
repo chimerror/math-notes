@@ -69,26 +69,12 @@ Now, let us assume there is some fixed but unknown function $f(X)$, that forms a
 Here $\epsilon$ is an *error term*, a random value independent of $X$, with mean zero. While $f$ is the *systematic*
 information that $X$ provides about $Y$. Because $f$ takes arguments from the entire group of variables, $X$, it will
 likely be a function of many variables. *Statistical learning*, then, is a method for estimating what $f$ might be based
-from $X$.
-
-Prediction and Inference
-------------------------
-
-There are two competing reasons to use statistical learning, prediction and inference. These goals often require
-different methods to be reached.
-
-### Prediction
-
-With *prediction*, our major concern is generating the values of $\hat{Y}$, an estimate of $Y$, where $\hat{Y}$ is
-defined as:
+from $X$. That is we want to find $\hat{f}$, an estimate of $f$. Since the error term $\epsilon$ has mean zero, we can
+use $\hat{Y}$ for a prediction of $Y$:
 
 $$
     \hat{Y} = \hat{f}(X)
 $$
-
-Where $\hat{f}$ is our estimate for $f$. And $\hat{Y}$ should be an useful estimate of $Y$ since $\epsilon$ has mean
-zero.  In this case we're not concerned with the exact form of $\hat{f}$, just that its predictions of $Y$ are accurate,
-making $\hat{f}$ a "black box".
 
 In this case, there are two quantities that affect the accuracy of $\hat{Y}$ as a prediction. The first,
 *reducible error* is due to the differences between $\hat{f}$ and $f$. Using statistical learning, we can attempt to
@@ -111,12 +97,17 @@ the irreducible error. It is important to remember that while the reducible erro
 goal), the irreducible error will provide an upper bound for predictions of $Y$. What this bound actually is usually
 unknown.
 
-### Inference
+Prediction and Inference: the Why
+---------------------------------
 
-Comparatively, with *inference*, our major concern is the relationship between the individual variables of $X$,
-$X_{1},\ldots,X_{p}$, and $Y$. That is how does $Y$ change as $X$ changes. In this case $\hat{f}$ cannot be treated as a
-black box because its exact form is exactly what we're looking for.
+While the section before discussed $\hat{Y}$ as a *prediction* of $Y$, a method to generate estimates of $Y$ given
+various $X$ as input, this is not always our major concern. We are sometimes more concerned with *inference*, that is,
+the relationship between the individual variables of $X$ (that is, $X_{1},\ldots,X_{p}$) and $Y$. We want to know
+exactly how $Y$ changes as $X$ changes. Inference can be concerned with the existences of relationships, the directions
+and sizes of relationships, or even if the relationships can be summarized with a linear equation.
 
-Inference can be concerned with the existences of relationships, the directions and sizes of relationships, or even if
-the relationships can be summarized with a linear equation. This means inference tends to favor more interpretable
-models for $\hat{f}$ even if that leads to less accurate predictions for $Y$.
+While for prediction the exact form of $\hat{f}$ is unimportant compared to the need for accurate predictions of $Y$,
+for inference, the exact form of $\hat{f}$ is exactly what is important to us. This means inference tends to favor more
+interpretable models for $\hat{f}$ even if that leads to less accurate predictions for $Y$. Thus, different statistical
+learning techniques are more or less desirable based on which of prediction or inference (or both!) we are attempting to
+solve.
