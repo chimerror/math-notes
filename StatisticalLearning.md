@@ -29,8 +29,9 @@ in question.
 
 As a computational process, all variables are represented as numbers, either integers or real numbers. However,
 variables are not just **quantitative**, where the number itself represents the variable. They can also be
-**qualitative**, representing a non-numeric value. Examples of qualitative variables include: which neighborhood of a
-city the observation is from, sex, and race. Any such variable that represents one out of a non-ranked set.
+**qualitative** (also called **categorical**), representing a non-numeric value. Examples of qualitative variables
+include: which neighborhood of a city the observation is from, sex, and race. That is, any such variable that represents
+one out of a non-ranked set of **classes**.
 
 Representing Data as an Matrix
 ------------------------------
@@ -78,7 +79,7 @@ $$
 
 In this case, there are two quantities that affect the accuracy of $\hat{Y}$ as a prediction. The first,
 **reducible error** is due to the differences between $\hat{f}$ and $f$. Using statistical learning, we can attempt to
-*reduce this error by finding more accurate estimates of $\hat{f}$ for $f$.
+reduce this error by finding more accurate estimates of $\hat{f}$ for $f$.
 
 However, as noted in equation $\eqref{eq:1}$, $Y$ also depends on $\epsilon$. $\epsilon$ cannot be reduced by improving
 $\hat{f}$ to better estimate $f$, thus it is *irreducible error*. Despite $\epsilon$ having mean zero, $\epsilon$ may
@@ -141,3 +142,29 @@ In general, we are seeking the correct balance between flexibility, allowing for
 flexibility and interpretability are negatively related. That is, more flexibility tends to reduce the interpretability
 of the method. However, that does not mean that a more flexible model *always* makes better predictions, since more
 flexible models are more prone to overfitting.
+
+Supervised and Unsupervised
+---------------------------
+
+So far we have assumed that we have paired observations of $Y$ for each observation of $X$. However, that is not always
+the case. If we do *not* have observations of $Y$, we can still determine relationships either between the variables
+(for example, does weight and height have a relationship), or between the observations. In the second case, we are often
+attempting to see which observations are most like other observations, that is, we are attempting to use
+**cluster analysis** to cluster the observations together into groups.
+
+This second case, with no response variable, is referred to as **unsupervised learning**, while the first is
+**supervised learning**. There may even be cases where we have the response variable for *some* of the observations in
+$X$, but not all of them. This is **semi-supervised learning**, naturally, and is an advanced topic.
+
+Regression and Classification
+-----------------------------
+
+We can further divide methods based on if the response variable is quantitative or qualitative as defined above.
+Problems with a quantitative response are usually referred to as **regression** problems, while ones with a qualitative
+response are **classification** problems. However, this division is not always so clear. A method called logistic
+regression is typically used with a two-class or binary qualitative response, and can be seen as classification.
+However, as it also estimates the class probabilities, a quantitative value, it can be seen as regression.
+
+For this purpose we are generally only concerned with the nature of the response variable rather than the input
+variables. Of course input variables can be either qualitative or quantitative, too. However in general, most methods
+can be applied regardless of the input variable, as long as qualitative input variables are properly **coded**.
