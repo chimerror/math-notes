@@ -168,3 +168,40 @@ However, as it also estimates the class probabilities, a quantitative value, it 
 For this purpose we are generally only concerned with the nature of the response variable rather than the input
 variables. Of course input variables can be either qualitative or quantitative, too. However in general, most methods
 can be applied regardless of the input variable, as long as qualitative input variables are properly **coded**.
+
+Measuring Fit Quality through Mean Squared Error
+------------------------------------------------
+
+We are of course, desirous to be able to evaluate the performance of a statistical learning method. In the context of
+prediction, this can be measured through **mean square error (MSE)**. Given $n$ observations of input variables $x_{i}$
+for response variables $y_{i}$ with prediction function $\hat{f}$, this is:
+
+$$
+MSE = \frac{1}{n} \sum_{i=1}^n (y_{i} - \hat{f}(x_{i}))^2
+$$
+
+This is the sum of the squared differences of the actual observed response, $y_{i}$, and the predicted response,
+$\hat{f}(x_{i})$ for all observations. The better that $\hat{f}$ is at predicting $f$, the smaller these differences
+should be, by more closely matching $y_{i}$.
+
+However, this calculation here would be of the closeness of an $\hat{f}$ given the *training data*, or the
+**training MSE**. While this has some importance, we're really more concerned with how $\hat{f}$ performs on unseen
+*test data*.
+
+That is, given some test observation $(x_{0}, y_{0})$ that was not part of the original set of observations
+$\{(x_{1}, y_{1}), \ldots, (x_{n}, y_{n})\}$, we'd rather know how close $\hat{f}(x_{0})$ is to $y_{0}$. And given a
+whole set of test observations, we can calculate the **test MSE**:
+
+$$
+\mathrm{Ave}(y_{0} - \hat{f}(x_{0}))^2
+$$
+
+The average of the squared differences of actual observed test response $y_{0}$ and predicted response $\hat{f}(x_{0})$
+for all test observations. That is, assuming we *have* a set of test observations to use.
+
+If we don't, we might start with minimizing the training MSE, but there is nothing to guarantee that the method with the
+lowest training MSE will also minimize the test MSE. The particular problem is our old foe overfitting.  By being very
+flexible in generating $\hat{f}$, there's a greater chance that we too closely follow the noise of the given test data,
+leading to our $\hat{f}$ attempting to follow trends that are not actually there. That is, going back to our original
+assumption of $Y$ being related to $X$ by some unknown function $f$ plus some error term $\epsilon$ we made in
+$\eqref{eq:1}$, there is nothing that guarantees that $\hat{f}$ is following $f$ instead of $\epsilon$.
