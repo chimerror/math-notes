@@ -69,8 +69,8 @@ Now, let us assume there is some fixed but unknown function $f(X)$, that forms a
 Here $\epsilon$ is an *error term*, a random value independent of $X$, with mean zero. While $f$ is the *systematic*
 information that $X$ provides about $Y$. Because $f$ takes arguments from the entire group of variables, $X$, it will
 likely be a function of many variables. *Statistical learning*, then, is a method for estimating what $f$ might be based
-from $X$. That is we want to find $\hat{f}$, an estimate of $f$. Since the error term $\epsilon$ has mean zero, we can
-use $\hat{Y}$ for a prediction of $Y$:
+using $X$ as *training data*. That is we want to find $\hat{f}$, an estimate of $f$. Since the error term $\epsilon$ has
+mean zero, we can use $\hat{Y}$ for a prediction of $Y$:
 
 $$
     \hat{Y} = \hat{f}(X)
@@ -111,3 +111,33 @@ for inference, the exact form of $\hat{f}$ is exactly what is important to us. T
 interpretable models for $\hat{f}$ even if that leads to less accurate predictions for $Y$. Thus, different statistical
 learning techniques are more or less desirable based on which of prediction or inference (or both!) we are attempting to
 solve.
+
+Parametric and Non-Parametric: the How
+--------------------------------------
+
+One way to begin finding estimates for $f$ is to first select a model for $\hat{f}$, such as this linear one:
+
+$$
+    \hat{f}(X) = \beta_{0} + \beta_{1}X_{1}+ \beta_{2}X_{2} + \ldots + \beta_{p}X_{p}
+$$
+
+Having made this assumption, rather than predicting an entire $p$-dimensional function, we only need to find the $p+1$
+coefficients $\beta_{0},\beta_{1},\ldots,\beta_{p}$. We do this by using the training data in $X$ to *fit* or *train*
+the model. That is choosing the *parameters* $\beta_{0},\beta_{1},\ldots,\beta_{p}$ to best match $Y$, given the values in
+$X$. This method of fitting to a model is a *parametric* method.
+
+Of course by choosing a model, we run a risk of choosing a model that is far from the actual function $f$. We can
+attempt to get a better fit of our model to $f$ by choosing more *flexible* models, which generally have more parameters
+to estimate. Flexible models also run the risk of *overfitting* the data, too closely following the errors or *noise* in
+the data, treating them as meaningful.
+
+Instead of assuming a functional form in advance, *non-parametric* methods make no assumptions about $f$. Instead,
+estimates are based on the data itself, within some range of *smoothness* for the fit. By increasing the smoothness of
+the fit, the generated fit can follow training data more closely. While this may be more accurate, the same risk of
+overfitting exists here.
+
+In general, we are seeking the correct balance between flexibility, allowing for more accurate predictions, and
+*interpretability*, the ability to describe the relationships of individual variables of $X$ to $Y$. In general,
+flexibility and interpretability are negatively related. That is, more flexibility tends to reduce the interpretability
+of the method. However, that does not mean that a more flexible model *always* makes better predictions, since more
+flexible models are more prone to overfitting.
