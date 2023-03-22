@@ -42,9 +42,9 @@ language. However when using "or" with statements $P$ and $Q$:
 
 > $P$ or $Q$.
 
-means that either *or both* of $P$ and $Q$ must be true. This type of use of "or" is referred to as the
+means that either or *both* of $P$ and $Q$ must be true. This type of use of "or" is referred to as the
 **inclusive or**. By allowing both $P$ and $Q$ to be true, the inclusive or is distinguished from the **exclusive or**
-as it is some times used in natural language, that is, allowing *either* $P$ or $Q$ to be true, but not *both*. This
+as it is some times used in natural language, that is, allowing *either* $P$ or $Q$ to be true, but *not* both. This
 truth table summarizes the difference:
 
 | Type of "or" | $P$    | $Q$    | $P$ or $Q$ |
