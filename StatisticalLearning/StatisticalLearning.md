@@ -1,3 +1,8 @@
+---
+documentclass: report
+fontfamily: heuristica
+---
+
 Notes on Statistical Learning
 =============================
 
