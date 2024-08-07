@@ -36,7 +36,9 @@ As a computational process, all variables are represented as numbers, either int
 variables are not just **quantitative**, where the number itself represents the variable. They can also be
 **qualitative** (also called **categorical**), representing a non-numeric value. Examples of qualitative variables
 include: which neighborhood of a city the observation is from, sex, and race. That is, any such variable that represents
-one out of a non-ranked set of **classes**.
+one out of a non-ranked set of **classes**. We can also consider categorical data that *does* have an ordering, such as
+the categories of "Small", "Medium", and "Large" where the difference between Medium and Small may not necessarily be
+equal to the difference between Large and Medium despite there being an order.
 
 Representing Data as an Matrix
 ------------------------------
@@ -66,7 +68,8 @@ Let's say we have an $n \times p$ matrix of $n$ observations $\mathbf{X}$. Each 
 variables each of which is $X_{i}$. The group of these variables, $X$ makes up our **input variables**. Let's also say
 we have an **output variable** (also called a **response variable**), $Y$.
 
-Now, let us assume there is some fixed but unknown function $f(X)$, that forms a relationship between $X$ and $Y$, such that:
+Now, let us assume there is some fixed but unknown function $f(X)$, that forms a relationship between $X$ and $Y$, such
+that:
 
 \begin{equation}
     Y = f(X) + \epsilon\label{eq:1}
@@ -98,10 +101,10 @@ between $Y$ and $\hat{Y}$:
                    & = & |f(X) - \hat{f}(X)|^2 + \mathrm{Var}(\epsilon)
 \end{eqnarray*}
 
-Here $|f(X) - \hat{f}(X)|^2$ is the reducible error, while the **variance** of $\epsilon$, $\mathrm{Var}(\epsilon)$, is
-the irreducible error. It is important to remember that while the reducible error can be minimized (which will be our
-goal), the irreducible error will provide an upper bound for predictions of $Y$. What this bound actually is usually
-unknown.
+Here $|f(X) - \hat{f}(X)|^2$ is the **reducible error**, while the variance (this is described later) of $\epsilon$,
+$\mathrm{Var}(\epsilon)$, is the **irreducible error**. It is important to remember that while the reducible error can
+be minimized (which will be our goal), the irreducible error will provide an upper bound for predictions of $Y$. What
+this bound actually is usually unknown.
 
 Prediction and Inference: the Why
 ---------------------------------
@@ -205,8 +208,53 @@ The average of the squared differences of actual observed test response $y_{0}$ 
 for all test observations. That is, assuming we *have* a set of test observations to use.
 
 If we don't, we might start with minimizing the training MSE, but there is nothing to guarantee that the method with the
-lowest training MSE will also minimize the test MSE. The particular problem is our old foe overfitting.  By being very
+lowest training MSE will also minimize the test MSE. The particular problem is our old foe overfitting. By being very
 flexible in generating $\hat{f}$, there's a greater chance that we too closely follow the noise of the given test data,
 leading to our $\hat{f}$ attempting to follow trends that are not actually there. That is, going back to our original
 assumption of $Y$ being related to $X$ by some unknown function $f$ plus some error term $\epsilon$ we made in
 $\eqref{eq:1}$, there is nothing that guarantees that $\hat{f}$ is following $f$ instead of $\epsilon$.
+
+Bias and Variance
+-----------------
+
+It can be proven (but not here) that the expected test MSE can be decomposed into three quantities:
+
+* the **variance** of $\hat{f}(x_{0})$, the amount of change in $\hat{f}$ when estimating it with different training
+  data sets
+* the squared **bias** of $\hat{f}(x_{0})$, where bias refers to the error introduced by the mismatch between the chosen
+  model and the real-life problem
+* the variance of the error term $\epsilon$, $\mathrm{Var}(\epsilon)$, that is, the irreducible error
+
+Note that while the irreducible error also uses the term "variance", most of the discussion in this section will be
+referring to the variance of the *predicted function*, because that variance *can* be changed based on method
+selection.
+
+This composition can be summarized in this equation:
+
+$$
+E(y_{0} - \hat{f}(x_{0}))^2 = \mathrm{Var}(\hat{f}(x_{0})) + [\mathrm{Bias}(\hat{f}(x_{0}))]^2 + \mathrm{Var}(\epsilon)
+$$
+
+The variance of the method is a natural result of using training data. Different selections of training data will cause
+the eventual predicted function to differ. Ideally, this difference is small. In general, a more flexible method will
+follow the training data more closely, leading to a higher variance as small changes in training data can lead to large
+changes in $\hat{f}$.
+
+Bias is also a natural result of approximating complicated real-life behavior with a simpler model. If we choose to only
+consider linear models as we do with linear regression, then any non-linear behavior will be poorly approximated, no
+matter how much more data we use to train it. In essence, we've foreclosed better matching models from consideration.
+Flexibility of method tends to *negatively* correlate with bias, in that more flexible methods tend to be *less* biased
+as they are more willing to follow the data.
+
+So as flexibility increases, variance increases and bias decreases, with the different rates of change determining if
+the test MSE will decrease or increase. The tendency is that bias tends to decrease relatively quickly compared to
+the increase in variance *early on*. But eventually, the decrease in bias begins to diminish and the increase in
+variance begins to dominate. When graphing the test MSE against the flexibility, this will produce a U-shape, where the
+test MSE first decreases and then increases. The challenge then is how best to balance the trade-off between bias and
+variance. Choosing low-bias methods tends to result in high variance, and choosing low-variance methods tends to result
+in high bias, but we ideally want our chosen method to be low in both.
+
+Note that in practice, $f$ is unobserved and unknown, and thus explicit computation of the test MSE is impossible.
+Despite this, the bias-variance trade-off still applies. Many of the methods that will be discussed are very flexible,
+and thus have very low bias. However, if the data itself *is* biased, for example, they really point to a truly linear
+relationship, then the less flexible linear regression will tend to do a better job despite being highly biased.
