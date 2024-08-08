@@ -177,12 +177,13 @@ For this purpose we are generally only concerned with the nature of the response
 variables. Of course input variables can be either qualitative or quantitative, too. However in general, most methods
 can be applied regardless of the input variable, as long as qualitative input variables are properly **coded**.
 
-Measuring Fit Quality through Mean Squared Error
-------------------------------------------------
+Measuring Regression Fit Quality through Mean Squared Error
+-----------------------------------------------------------
 
 We are of course, desirous to be able to evaluate the performance of a statistical learning method. In the context of
-prediction, this can be measured through **mean square error (MSE)**. Given $n$ observations of input variables $x_{i}$
-for response variables $y_{i}$ with prediction function $\hat{f}$, this is:
+regression methods (we will go over classification methods later), this can be measured through
+**mean square error (MSE)**. Given $n$ observations of input variables $x_{i}$ for response variables $y_{i}$ with
+prediction function $\hat{f}$, this is:
 
 $$
 MSE = \frac{1}{n} \sum_{i=1}^n (y_{i} - \hat{f}(x_{i}))^2.
@@ -214,8 +215,8 @@ leading to our $\hat{f}$ attempting to follow trends that are not actually there
 assumption of $Y$ being related to $X$ by some unknown function $f$ plus some error term $\epsilon$ we made in
 $\eqref{eq:1}$, there is nothing that guarantees that $\hat{f}$ is following $f$ instead of $\epsilon$.
 
-Bias and Variance
------------------
+Bias and Variance in Regression
+-------------------------------
 
 It can be proven (but not here) that the expected test MSE can be decomposed into three quantities:
 
@@ -258,3 +259,78 @@ Note that in practice, $f$ is unobserved and unknown, and thus explicit computat
 Despite this, the bias-variance trade-off still applies. Many of the methods that will be discussed are very flexible,
 and thus have very low bias. However, if the data itself *is* biased, for example, they really point to a truly linear
 relationship, then the less flexible linear regression will tend to do a better job despite being highly biased.
+
+Measuring Classification Quality through Error Rate
+---------------------------------------------------
+
+Many of the concepts for model accuracy that we have discussed in the context of regression models also apply to
+classification models. We are still seeking to estimate a function $f$ by creating a prediction function $\hat{f}$ based
+on training observations $\{(x_{1}, y_{1}), \ldots, (x_{n}, y_{n})\}$, but now $y_{1}, \ldots, y_{n}$ are qualitative.
+It doesn't make sense to consider the MSE since despite being coded as a number there is no ordering of qualitative
+data. So the **error rate** is preferred:
+
+\begin{equation}
+    \frac{1}{n} \sum_{i=1}^n I(y_{i} \neq \hat{y}_{i})\label{eq:2}.
+\end{equation}
+
+$\hat{y}_{i}$ refers to which class label is predicted for the $i$th observation by $\hat{f}$.
+$I(y_{i} \neq \hat{y}_{i})$, then is the **indicator variable** which equals $1$ when $y_{i} \neq \hat{y}_{i}$ and $0$
+when $y_{i} = \hat{y}_{i}$. That is a result of $0$ means $\hat{f}$ classified the observation correctly, while a
+result of $1$ means it misclassified it. Thus, this gives us the proportion of misclassifications.
+
+Equation $\eqref{eq:2}$ is more exactly the **training error rate** as it is calculated on the training data. This is
+fine, but more interesting is the **test error rate**. For a set of test observations $(x_{0}, y_{0})$, the test error
+rate is:
+
+$$
+\mathrm{Ave}(I(y_{0} \neq \hat{y}_{0})).
+$$
+
+Here $\hat{y}_{0}$ is the predicted class label for the $0$th test observation. The aim is to pick a classification
+model that minimizes this value. To illustrate this further, let's demonstrate using two simple classifiers.
+
+### The Bayes Classifier
+
+It can be proven (though, still not here) that the test error rate can be minimized if we are able to create the
+**Bayes classifier** by being able to calculate the conditional distribution of the data. This classifier assigns each
+observation to the most likely class given the predictor values. That is, given predictor vector $x_{0}$, we pick
+whichever class $j$ has the highest value for the conditional probablity $\Pr(Y = j|X = x_{0})$. In a two-class case
+where the classes are, say, $1$ or $2$, the Bayes classifier would assign $x_{0}$ to class $1$ if
+$\Pr(Y = 1|X = x_{0}) > 0.5$ and class $2$ otherwise.
+
+Let us further assume in our two-class problem that there are two predictors that make up $X$, $X_{1}$ and $X_{2}$. If
+we chart these two predictors against each other, we can draw a boundary where the probability of assigning to either
+class is 50% called the **Bayes decision boundary**. In short, this boundary divides the space into an area where a
+predictor vector will be assigned to class $1$ and an area where a predictor will be assigned to class $2$.
+
+As mentioned, the Bayes classifier will produce the lowest possible test error rate, the **Bayes error rate**, which is
+much like the irreducible error. For $X = x_{0}$ this would be $1 - \max_{j}\Pr(Y = j|X = x_{0})$. And
+extending over all $X$:
+
+$$
+1 - E(\max_{j}\Pr(Y = j|X)).
+$$
+
+### K-Nearest Neighbors
+
+Given real data, it is generally impossible to compute the Bayes classifier since we don't actually know the conditional
+distribution of the data. But it still has some use as a standard to compare other methods against, which instead
+attempt to estimate the conditional distribution, and then assign a class based on this estimate.
+
+For example, the **K-nearest neighbors (KNN) classifier** is based on a constant positive integer $K$ and a test
+observation $x_{0}$. It starts by identifying the $K$ closet points in the training data to $x_{0}$, $\mathcal{N}_{0}$.
+From this, the conditional probability for class $j$ can be estimated by the fraction of points in $\mathcal{N}_{0}$
+that are in class $j$:
+
+$$
+\Pr(Y = j|X = x_{0}) = \frac{1}{K} \sum_{i \in \mathcal{N}_{0}}I(y_{i} = j).
+$$
+
+Whichever class $j$ has the highest probability is what $x_{0}$ is assigned to. We can graph the decision boundary for
+KNN just the same as we did with the Bayes decision boundary, and despite the simplicity of the method, the KNN decision
+boundary can get very close to the ideal Bayes decision boundary. However, this depends on the choice of $K$. As $K$
+grows, KNN becomes less flexible since more of the training data affects the boundary. If $K=1$, it is likely that the
+boundary will be too flexible and overfit to close data, while at the other extreme of say, $K=100$, the boundary will
+not be flexible enough to better follow the Bayes boundary. These issues will result in higher test error rates,
+producing the familiar U-shape where both extremes have high error. Picking $K$ so that the test error is minimized
+becomes the goal.
