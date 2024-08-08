@@ -56,7 +56,7 @@ $$
         x_{21} & x_{22} & \ldots & x_{2p} \\
         \vdots & \vdots & \ddots & \vdots \\
         x_{n1} & x_{n2} & \ldots & x_{np} \\
-    \end{array} \right)
+    \end{array} \right).
 $$
 
 Each row of the matrix is one observation, and each column is a variable.
@@ -72,7 +72,7 @@ Now, let us assume there is some fixed but unknown function $f(X)$, that forms a
 that:
 
 \begin{equation}
-    Y = f(X) + \epsilon\label{eq:1}
+    Y = f(X) + \epsilon\label{eq:1}.
 \end{equation}
 
 Here $\epsilon$ is an **error term**, a random value independent of $X$, with mean zero. While $f$ is the **systematic**
@@ -82,7 +82,7 @@ based using $X$ as **training data**. That is we want to find $\hat{f}$, an esti
 $\epsilon$ has mean zero, we can use $\hat{Y}$ for a prediction of $Y$:
 
 $$
-    \hat{Y} = \hat{f}(X)
+    \hat{Y} = \hat{f}(X).
 $$
 
 In this case, there are two quantities that affect the accuracy of $\hat{Y}$ as a prediction. The first,
@@ -98,7 +98,7 @@ between $Y$ and $\hat{Y}$:
 
 \begin{eqnarray*}
     E(Y-\hat{Y})^2 & = & E|f(X) + \epsilon - \hat{f}(X)|^2 \\
-                   & = & |f(X) - \hat{f}(X)|^2 + \mathrm{Var}(\epsilon)
+                   & = & |f(X) - \hat{f}(X)|^2 + \mathrm{Var}(\epsilon).
 \end{eqnarray*}
 
 Here $|f(X) - \hat{f}(X)|^2$ is the **reducible error**, while the variance (this is described later) of $\epsilon$,
@@ -127,7 +127,7 @@ Parametric and Non-Parametric: the How
 One way to begin finding estimates for $f$ is to first select a model for $\hat{f}$, such as this linear one:
 
 $$
-    \hat{f}(X) = \beta_{0} + \beta_{1}X_{1}+ \beta_{2}X_{2} + \ldots + \beta_{p}X_{p}
+    \hat{f}(X) = \beta_{0} + \beta_{1}X_{1}+ \beta_{2}X_{2} + \ldots + \beta_{p}X_{p}.
 $$
 
 Having made this assumption, rather than predicting an entire $p$-dimensional function, we only need to find the $p+1$
@@ -185,7 +185,7 @@ prediction, this can be measured through **mean square error (MSE)**. Given $n$ 
 for response variables $y_{i}$ with prediction function $\hat{f}$, this is:
 
 $$
-MSE = \frac{1}{n} \sum_{i=1}^n (y_{i} - \hat{f}(x_{i}))^2
+MSE = \frac{1}{n} \sum_{i=1}^n (y_{i} - \hat{f}(x_{i}))^2.
 $$
 
 This is the sum of the squared differences of the actual observed response, $y_{i}$, and the predicted response,
@@ -201,7 +201,7 @@ $\{(x_{1}, y_{1}), \ldots, (x_{n}, y_{n})\}$, we'd rather know how close $\hat{f
 whole set of test observations, we can calculate the **test MSE**:
 
 $$
-\mathrm{Ave}(y_{0} - \hat{f}(x_{0}))^2
+\mathrm{Ave}(y_{0} - \hat{f}(x_{0}))^2.
 $$
 
 The average of the squared differences of actual observed test response $y_{0}$ and predicted response $\hat{f}(x_{0})$
@@ -232,7 +232,7 @@ selection.
 This composition can be summarized in this equation:
 
 $$
-E(y_{0} - \hat{f}(x_{0}))^2 = \mathrm{Var}(\hat{f}(x_{0})) + [\mathrm{Bias}(\hat{f}(x_{0}))]^2 + \mathrm{Var}(\epsilon)
+E(y_{0} - \hat{f}(x_{0}))^2 = \mathrm{Var}(\hat{f}(x_{0})) + [\mathrm{Bias}(\hat{f}(x_{0}))]^2 + \mathrm{Var}(\epsilon).
 $$
 
 The variance of the method is a natural result of using training data. Different selections of training data will cause
