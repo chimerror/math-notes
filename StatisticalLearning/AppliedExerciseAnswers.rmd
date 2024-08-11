@@ -1,0 +1,603 @@
+An Introduction to Statistical Learning, Applied Exercises
+==========================================================
+
+```{r setup, include = FALSE}
+library(tidyverse)
+library(ISLR2)
+```
+
+Chapter 2
+---------
+
+### Exercise 8
+
+This exercise relates to the `College` data set. It contains a number of variables for 777 different universities and
+colleges in the US.
+
+#### Answer to Exercise 8
+
+(a) Skipping this because I'm well aware of how to read in CSV into R, and the data set is available already as part of
+the `ISLR2` package.
+
+(b) Likewise, I prefer to use tibbles and tibbles do not have good support for row names. I'll fix that, and convert to
+a tibble:
+
+```{r}
+College_no_rownames <- rownames_to_column(College)
+College_tbl <- as_tibble(College_no_rownames)
+```
+
+(c)
+
+i. Use the `summary()` function to produce a numerical summary of the variables in the data set.
+
+```{r}
+summary(College_tbl)
+```
+
+ii. Use the `pairs()` function to produce a scatterplot matrix of the first ten columns or variables of the data. Recall
+that you can reference the first ten columns of a matrix `A` using `A[,1:10]`.
+
+```{r}
+pairs(College_tbl[,2:11])
+```
+
+(Note that the command is slightly different because we included the row names as a column.)
+
+iii. Use the `plot()` function to produce side-by-side boxplots of `Outstate` versus `Private`.
+
+I'll use `ggplot()` instead:
+
+```{r}
+ggplot(College_tbl, aes(Private, Outstate)) + geom_boxplot()
+```
+
+iv. Create a new qualitative variable, called `Elite`, by *binning* the `Top10perc` variable. We are going to divide
+universities into two groups based on whether or not the proportion of students coming from the top 10% of their high
+school classes exceeds 50%.
+
+Converting the example code to dplyr code:
+
+```{r}
+College_tbl <- College_tbl %>%
+    mutate(Elite = as_factor(if_else(Top10perc > 50, "Yes", "No")))
+```
+
+Using `summary()` to see how many elite universities there are:
+
+```{r}
+summary(College_tbl$Elite)
+```
+
+And using `ggplot` to make side-by-side boxplots of `Outstate` versus `Elite`:
+
+```{r}
+ggplot(College_tbl, aes(Elite, Outstate)) + geom_boxplot()
+```
+
+v. Use the `hist()` function to produce some histograms with differing numbers of bins for a few of the quantitative
+variables.
+
+I'll use `ggplot` instead.
+
+```{r}
+ggplot(College_tbl, aes(x = Apps)) + geom_histogram(binwidth = 5000)
+ggplot(College_tbl, aes(x = Enroll)) + geom_histogram(binwidth = 500)
+ggplot(College_tbl, aes(x = F.Undergrad)) + geom_histogram(binwidth = 5000)
+ggplot(College_tbl, aes(x = Expend)) + geom_histogram(binwidth = 5000)
+```
+
+vi. Continue exploring the data, and provide a brief summary of what you discover.
+
+Rather than going to town on the entire data, I think I will content myself to asking a question that occurred to me as
+I looked at the data: how elite are the elite schools we determined in the earlier part of this exercise?
+
+The columns about applications, `Apps` and `Accept` both use the raw numbers of applications:
+
+```{r}
+summary(College_tbl$Apps)
+summary(College_tbl$Accept)
+```
+
+Which is OK, but since schools have very different student populations as can be seen in the `F.Undergrad` and
+`P.Undergrad` columns, which makes it hard to compare:
+
+```{r}
+summary(College_tbl$F.Undergrad)
+summary(College_tbl$P.Undergrad)
+```
+
+Thinking of this, it may be useful to combine the `F.Undergrad` and `P.Undergrad` into a single column:
+
+```{r}
+College_tbl <- College_tbl %>%
+    mutate(T.Undergrad = F.Undergrad + P.Undergrad, .after = P.Undergrad)
+summary(College_tbl$T.Undergrad)
+```
+
+And while the summaries are nice, nothing beats a good boxplot to demonstrate the issue:
+
+```{r}
+ggplot(College_tbl, aes(T.Undergrad)) + geom_boxplot()
+```
+
+This chart shows that there are *a lot* of outliers, starting at about 10,000 students. And looking at the histogram:
+
+```{r}
+ggplot(College_tbl, aes(x = T.Undergrad)) + geom_histogram(binwidth = 2500)
+```
+
+we can see that the two biggest bins are below 5,000 students, but we get all the way up to a max of 38,338 students.
+
+The vast differences in size means that we can't easily use the raw numbers for schools to compare between them, but we
+*can* calculate the acceptance rate:
+
+```{r}
+College_tbl <- College_tbl %>%
+    mutate(AcceptRate = Accept / Apps, .after = Accept)
+summary(College_tbl$AcceptRate)
+ggplot(College_tbl, aes(AcceptRate)) + geom_boxplot()
+ggplot(College_tbl, aes(x = AcceptRate)) + geom_histogram(binwidth = 0.125)
+```
+
+I personally was a bit surprised to learn the average acceptance rate was so high, with a mean of 74.7%! Though, it also
+shows that there are a number of very selective outliers starting a bit above 37.5%. Could these be the elite schools?
+Is there a difference?
+
+```{r}
+ggplot(College_tbl, aes(Elite, AcceptRate)) + geom_boxplot()
+```
+
+It seems so! The elite schools do have a significantly lower acceptance rate, though still above 50%, and there are some
+non-elite schools that are similarly low. But let's figure out exactly how different the elite schools are:
+
+```{r}
+College_elite <- College_tbl %>% filter(Elite == "Yes")
+College_non_elite <- College_tbl %>% filter(Elite == "No")
+summary(College_elite$AcceptRate)
+summary(College_non_elite$AcceptRate)
+```
+
+So this means that while non-elite schools have a mean acceptance rate of 77.0%, up from 74.7% for the entire
+population, elite schools have a mean of 53.3%. These are indeed very elite schools!
+
+### Exercise 9
+
+This exercise involves the `Auto` data set.
+
+Let's start by converting it to my preferred format of a tibble.
+
+```{r}
+Auto_tbl <- as_tibble(Auto)
+```
+
+#### Answers to Exercise 9
+
+(a) Which of the predictors are quantitative, and which are qualitative?
+
+Using `?Auto` to look at the help for the data set, the qualitative predictors are `cylinders`, `origin`, and `name`.
+`cylinders` is qualitative not quantitative in my opinion because there has to be an integral number of cylinders in a
+car engine, so it is not continuous in the same way that the other quantitative predictors are where fractional numbers
+can make sense (even though many of them are integers). Plus, there are very few distinct values because it's more a
+feature of the engine design than a measurement of it.
+
+All the other predictors (`mpg`, `displacement`, `horsepower`, `weight`, `acceleration`, and `year`) are quantitative. I
+think it could be argued that since `year` represents model year, and not exactly a year in time that it is actually
+qualitative, but I think could be interesting trends year-over-year even using model year, so I lean more towards
+quantitative. Plus compared to my discussion of `cylinders` above, `year` *is* continuous.
+
+In reality, both `year` and `cylinders` could be argued to be either, but I think my choice here is supported by the
+problem domain.
+
+(b) What is the *range* of each quantitative predictor?
+
+Using `range()`:
+
+```{r}
+range(Auto_tbl$mpg)
+range(Auto_tbl$displacement)
+range(Auto_tbl$horsepower)
+range(Auto_tbl$weight)
+range(Auto_tbl$acceleration)
+range(Auto_tbl$year)
+```
+
+(c) What is the mean and standard deviation of each quantitative predictor?
+
+Using `mean()` and `sd()`
+
+```{r}
+mean(Auto_tbl$mpg)
+sd(Auto_tbl$mpg)
+mean(Auto_tbl$displacement)
+sd(Auto_tbl$displacement)
+mean(Auto_tbl$horsepower)
+sd(Auto_tbl$horsepower)
+mean(Auto_tbl$weight)
+sd(Auto_tbl$weight)
+mean(Auto_tbl$acceleration)
+sd(Auto_tbl$acceleration)
+mean(Auto_tbl$year)
+sd(Auto_tbl$year)
+```
+
+(d) Now remove the 10th through 85th observations. What is the range, mean, and standard deviation of each predictor in
+the subset of the data that remains?
+
+Removing the rows using `filter()` and `row_number()`:
+
+```{r}
+Auto_subset <- Auto_tbl %>% filter(row_number() < 10 | row_number() > 85)
+```
+
+And for each quantitative predictor (because this doesn't make sense on qualitative predictors:
+
+```{r}
+range(Auto_subset$mpg)
+mean(Auto_subset$mpg)
+sd(Auto_subset$mpg)
+range(Auto_subset$displacement)
+mean(Auto_subset$displacement)
+sd(Auto_subset$displacement)
+range(Auto_subset$horsepower)
+mean(Auto_subset$horsepower)
+sd(Auto_subset$horsepower)
+range(Auto_subset$weight)
+mean(Auto_subset$weight)
+sd(Auto_subset$weight)
+range(Auto_subset$acceleration)
+mean(Auto_subset$acceleration)
+sd(Auto_subset$acceleration)
+range(Auto_subset$year)
+mean(Auto_subset$year)
+sd(Auto_subset$year)
+```
+
+(e) Using the full data set, investigate the predictors graphically, using scatterplot or other tools of your choice.
+Create some plots highlighting the relationships among the predictors. Comment on your findings
+
+Let's start by looking at all of them using `pairs()`, focusing only on the quantitative predictors:
+
+```{r}
+pairs(
+    ~ mpg + displacement + horsepower + weight + acceleration + year,
+    data = Auto_tbl
+)
+```
+
+The scatterplots for `year` shows how `year` is not continuous like the other variables that we've been considering
+quantitative, so it doesn't seem immediately helpful to consider that predictor, so we won't any more. One thing that
+sticks out to me is that for `mpg` against all the predictors except `acceleration`, there is a very clear non-linear
+decreasing relationship as `mpg` increases. Or perhaps it's better to think that `displacement`, `horsepower`, and
+`weight` seem negatively correlated with `mpg`, which isn't too surprising given each of those. Bigger, stronger engines
+tend to have greater displacement, horsepower, and weight, but at the cost of gas mileage. Let's take a look in
+detail:
+
+```{r}
+ggplot(Auto_tbl, aes(displacement, mpg)) + geom_point()
+ggplot(Auto_tbl, aes(horsepower, mpg)) + geom_point()
+ggplot(Auto_tbl, aes(weight, mpg)) + geom_point()
+```
+
+While it was definitely noticeable on the scatterplot matrix, it is also clear that despite this trend there are points
+off the main curve, implying that these engines have better gas mileage than expected. It would be interesting to see
+which cars these are in particular to see if there's anything that ties them together, but we have a lot more columns
+to examine, so we'll just leave that question hanging.
+
+The `mpg`-`acceleration` relationship seems much less correlated and obvious, which we can double-check looking at a
+bigger plot:
+
+```{r}
+ggplot(Auto_tbl, aes(acceleration, mpg)) + geom_point()
+```
+
+There does seem to be very slight and likely non-linear positive correlation where increasing acceleration seems to be
+tied to increasing gas mileage, but it's also obvious that it's much weaker in correlation with the pattern becoming
+almost imperceptible over about 12 seconds for 0-60 mph. It makes sense that faster acceleration should help conserve
+fuel as less will be needed to get up to speed, but it likely seems that other factors have more of a direct effect.
+
+Turning to the relationship of `displacement` to the remaining non-`mpg` predictors, we can see very clear linear
+relationships with positive correlation for `horsepower` and `weight` but negative correlation for `acceleration`. This
+negative correlation with `acceleration` is a bit surprising to me, since I might have assumed that bigger engines would
+be more powerful as implied by the positive correlation with horsepower and thus accelerate faster, but it seems like
+the increase in weight counteracts that. It is worth noting that the `displacement`-`acceleration` relationship seems
+to be more weakly correlated since there is wider variation. Let's look in more detail:
+
+```{r}
+ggplot(Auto_tbl, aes(horsepower, displacement)) + geom_point()
+ggplot(Auto_tbl, aes(weight, displacement)) + geom_point()
+ggplot(Auto_tbl, aes(acceleration, displacement)) + geom_point()
+```
+
+While the correlations against `horsepower` and `weight` are quite a bit less strongly correlated than it may have
+appeared on the scatterplot matrix, the linear positive correlation is still obvious. Meanwhile the correlation to
+`acceleration` is exactly as weak, but negative as expected.
+
+Next up is `horsepower`, which seems linearly and positively correlated to `weight`, but non-linearly and negatively
+correlated to `acceleration`:
+
+```{r}
+ggplot(Auto_tbl, aes(weight, horsepower)) + geom_point()
+ggplot(Auto_tbl, aes(acceleration, horsepower)) + geom_point()
+```
+
+Looking at the bigger plots, it seems the non-linearity of the `acceleration`-`horsepower` is not as strong as it may
+have looked in the matrix, but it still seems likely that it is non-linear. The relationship with `weight` is pretty
+much as we expected. Going back to what we've been discussing, it seems that bigger engines have more horsepower, but
+cars with faster acceleration have less horsepower (likely because they have smaller engines).
+
+We can check that assumption of higher acceleration engines being smaller and thus having lower weight by looking at
+the last pairing between `weight` and `acceleration`:
+
+```{r}
+ggplot(Auto_tbl, aes(acceleration, weight)) + geom_point()
+```
+
+While the correlation *does* seem negative in that higher acceleration seems to be correlated with lower weights, it's
+an exceedingly weak correlation as we've generally seen with acceleration and the other predictors. Another way to think
+about this is that other factors than these are likely more correlated with acceleration, or that what makes for fast
+acceleration is a more complex relationship than being tied to any one of these factors. Perhaps it's some combination
+of factors that most affects acceleration, but that would require more investigation than I think is necessary for this
+exercise.
+
+(f) Suppose we wish to predict gas mileage (`mpg`) on the basis of the other variables. Do your plots suggest that any
+of the other variables might be useful in predicting `mpg`? Justify your answer.
+
+Based on my earlier analysis, the strongest correlations with `mpg` seem to be `displacement`, `horsepower`, and
+`weight`, which `mpg` is negatively correlated against all. Comparatively, the relationship between `mpg` and
+`acceleration` is much weaker, and thus likely does not make a good candidate for predicting `mpg`. Without actually
+fitting to a model and determining the correlation, though it's hard to pick one of `displacement`, `horsepower`, or
+`weight` as being more useful.
+
+### Exercise 10
+
+This exercise involves the `Boston` housing data set.
+
+Converting to a tibble:
+
+```{r}
+Boston_tbl <- as_tibble(Boston)
+```
+
+#### Answer to Exercise 10
+
+(a) How many rows are in the data set? How many columns? What do the rows and columns represent?
+
+The number of rows and columns is easy enough to figure out based on looking at the tibble:
+
+```{r}
+Boston_tbl
+```
+
+There are 506 rows and 13 columns.
+
+And using `?Boston` to look at the data set, we can determine what they represent. Each row represents a suburb of
+Boston, and there are 13 columns:
+
+* `crim`: Per capita crime rate
+* `zn`: Proportion of residential land zoned for lots over 25,000 sq. ft.
+* `indus`: Proportion of non-retail business acres
+* `chas` : Represents if the town borders the Charles River, with 1 meaning it does and 0 meaning it does not
+* `nox`: Nitrogen oxides concentration in parts per 10 million
+* `rm`: Average number of rooms per dwelling
+* `age`: proportion of owner-occupied units build before 1940
+* `dis`: weighted mean of distances to employment centers in Boston.
+* `rad`: index of accessibility to radial highways
+* `tax`: full-value property-tax rate per $10,000
+* `ptratio`: student-teacher ratio
+* `lstat`: percentage of the population that is low-status
+* `medv`: median value of owner-occupied homes in thousands of dollars
+
+(b) Make some pairwise scatterplots of the predictors (columns) in this data set. Describe your findings.
+
+Let's use `pairs()` first, skipping over `chas` as it is a qualitative value of either 1 or 0:
+
+```{r}
+pairs(
+    ~ crim + zn + indus + nox + rm + age + dis + rad + tax + ptratio + lstat + medv,
+    data = Boston_tbl
+)
+```
+
+It's a bit hard to read this many, but it looks like `rad` and `tax` are disjoint in a way that likely makes them poor
+choice to look at deeper. There's also some strange clumping for `crim`, `zn`, `indus`, `rm`, and `ptratio`, though some
+of these do have more normal relationships. Let's drop all of those for now:
+
+```{r}
+pairs(
+    ~  nox + age + dis + lstat + medv,
+    data = Boston_tbl
+)
+```
+
+The first set of interesting relationships I can see are between `nox`, `age`, and `dist`. Since `nox` is related to
+pollution, it may be worth taking another look at `indus` too. Let's take a look using `pairs()`:
+
+```{r}
+pairs(
+    ~  indus + nox + age + dis,
+    data = Boston_tbl
+)
+```
+
+Looking here, we can see that increased proportion of industry (`indus`) does seem to be tied to more nitrous oxides
+(`nox`), as well as closer distances to Boston (`dis`), but doesn't seem to be that correlated with the age of the
+towns (`age`). Looking closer at `nox` and `dis`:
+
+```{r}
+ggplot(Boston_tbl, aes(indus, nox)) + geom_point()
+ggplot(Boston_tbl, aes(indus, dis)) + geom_point()
+```
+
+There is a very big clump in the `indus`-`nox` plot, which hurts the ability to tie the two predictors together, though
+this is less of a problem with `indus`-`dis`. It seems a better explanation for `nox` is found when it is used as the
+response for `age` and `dis`:
+
+```{r}
+ggplot(Boston_tbl, aes(age, nox)) + geom_point()
+ggplot(Boston_tbl, aes(dis, nox)) + geom_point()
+```
+
+This more clearly suggests that older towns tend to have higher nitrous oxides amounts, but that also closer towns do
+too. Perhaps this is because older towns tend to be closer to the city, as we can see on the `age`-`dis` chart, though
+with rather weak correlation:
+
+```{r}
+ggplot(Boston_tbl, aes(age, dis)) + geom_point()
+```
+
+Our 5-predictor scatterplot matrix also suggests a relationship between `lstat` and `medv`, which looking back at the
+full matrix also suggests relationships between `crim`, `age`, and `dis`, which is to be expected given that those
+are often very directly related to the economic status of the population. Putting these in a matrix:
+
+```{r}
+pairs(
+    ~  crim + age + dis + lstat + medv,
+    data = Boston_tbl
+)
+```
+
+The seemingly easiest to read relationship is between `lstat` and `medv`, so let's start there:
+
+```{r}
+ggplot(Boston_tbl, aes(lstat, medv)) + geom_point()
+```
+
+We can see a pretty clear drop in the value of homes as the proportion of lower-status population increases which is
+just a very straightforward result. Comparing between `lstat` and `medv`, `lstat` seems to also have strong correlations
+with `age` and `dis`:
+
+```{r}
+ggplot(Boston_tbl, aes(lstat, age)) + geom_point()
+ggplot(Boston_tbl, aes(lstat, dis)) + geom_point()
+```
+
+While it is not as strong as the correlation with `medv`, these suggest that poorer people tend to live in older
+suburbs and closer to the city, which follows from the general history of suburb flight, though it would be interesting
+to see if increasing amounts of gentrification in more recent years than this data has seen a change in this.
+
+The last comparison that seems worth making is if we do see the common result that poorer towns have higher crime rates:
+
+```{r}
+ggplot(Boston_tbl, aes(lstat, crim)) + geom_point()
+```
+
+While there is indeed the rough trend of more crime as towns have poorer populations, it's definitely not a solid
+assumption, since there is both a great deal of clumping around 0 crimes per capita and more than a few outliers of
+high crime areas with wealthier populations. Perhaps the issue is that crime just isn't really _that_ high anywhere,
+but it's also likely that different police departments have very different processes of investigating crime, so may
+be more or less lenient in what crimes they attest to in their towns.
+
+There are definitely other relationships that can be investigated, but this seems a good overview of some expected or
+interesting relationships, so I'll end here.
+
+(c) Are any of the predictors associated with per capita crime rate? If so, explain the relationship.
+
+I basically did this as part of answering (b) so I'll not repeat myself.
+
+(d) Do any of the census tracts of Boston appear to have particularly high crime rates? Tax rates? Pupil-teacher ratios?
+Comment on the range of each predictor.
+
+Starting with crime rates (`crim`):
+
+```{r}
+range(Boston_tbl$crim)
+summary(Boston_tbl$crim)
+ggplot(Boston_tbl, aes(crim)) + geom_boxplot()
+ggplot(Boston_tbl, aes(x = crim)) + geom_histogram(binwidth = 5)
+```
+
+Looking at these, it is very clear that while the range of crime rates is large, from far less than 1 crime per person
+(0.00632) to 89.0 crimes per person, the vast majority of towns tend to have very low crime rates, where nearly every
+town that has more than about 10 crimes per capita is an outlier on the boxplot, and once we get past about 25 crimes
+per capita, there are very few towns with that much crime, 11 out of 506:
+
+```{r}
+Boston_tbl %>% filter(crim > 25) %>% arrange(desc(crim))
+```
+
+Moving to tax rates (`tax`):
+
+```{r}
+range(Boston_tbl$tax)
+summary(Boston_tbl$tax)
+ggplot(Boston_tbl, aes(tax)) + geom_boxplot()
+ggplot(Boston_tbl, aes(x = tax)) + geom_histogram(binwidth = 50)
+```
+
+While no outliers appear on the boxplot, there is very obviously a bimodal population of tax rates, of towns less than
+about $500 per $10k of which there are 369 and greater than $600 per $10k of which there are 137.
+
+```{r}
+Boston_tbl %>% filter(tax < 500)
+Boston_tbl %>% filter(tax > 600)
+```
+
+My suspicion is that while the help file described these as suburbs, the questions often describe these as census tracts
+of which, some may be in the city itself. If that's a case, then I would expect that the higher tax rates are in the
+city. But for now, I'll just leave the question out there even though I can verify based on `dis`. (Which if true, may
+also explain some of the things I saw with crime rates since cities tend to report more crimes than suburbs.)
+
+Moving to student-teacher ratios (`ptratio`):
+
+```{r}
+range(Boston_tbl$ptratio)
+summary(Boston_tbl$ptratio)
+ggplot(Boston_tbl, aes(ptratio)) + geom_boxplot()
+ggplot(Boston_tbl, aes(x = ptratio)) + geom_histogram(binwidth = 1)
+```
+
+In this case, we don't actually see particularly large ratios, but a few particularly small ratios, what looks like two
+of them on the boxplot below 13.75:1, though some of these are not outliers:
+
+```{r}
+Boston_tbl %>% filter(ptratio < 13.75) %>% arrange(ptratio)
+```
+
+Looking at this, it seems that the same value is repeated for multiple observations. There are 3 towns with 12.6:1, and
+12 towns with 13:1. I suspect this could mean that some of the observations are for the same school district which serve
+multiple towns, which seems particularly likely for the 12.6:1 towns as they all have a `dis` of 7.31. With all the
+13:1 schools having a `dis` around 2, this also likely applies to them, too.
+
+(e) How many of the census tracts in this data set bound the Charles River?
+
+```{r}
+Boston_tbl %>% filter(chas == 1)
+```
+
+There seem to be 35 of them.
+
+(f) What is the median pupil-teacher ratio among the towns in this data set?
+
+```{r}
+median(Boston_tbl$ptratio)
+```
+
+The median is 19.05:1.
+
+(g) Which census tract of Boston has lowest median value of owner-occupied homes? What are the values of the other
+predictors for that census tract and how do those values compare to the overall ranges for those predictors? Comment
+on your findings.
+
+```{r}
+Boston_tbl %>% arrange(medv) %>% slice_head()
+```
+
+`crim` is high, `zn` is low, `indus` is high, `nox` is high, `rm` is low, `age` is high, `dis` is low, `rad` is high,
+`tax` is high, `ptratio` is high, and `lstat` is high. The tract does not border the Charles River. This suggests to
+me that this land is not likely zoned for dense residential areas, but instead industry and is probably right in the
+center of the city itself. It might not even really have many residents, but we don't have population.
+
+(f) In this data set, how many of the census tracts average more than seven rooms per dwelling? More than eight rooms
+per dwelling? Comment on the census tracts that average more than eight rooms per dwelling.
+
+```{r}
+Boston_tbl %>% filter(rm > 7)
+Boston_tbl %>% filter(rm > 8) %>% arrange(desc(rm))
+```
+
+There are 64 tracts with more than 7 rooms per dwelling and only 13 with more than 8. The biggest thing that sticks out
+to me about the tracts with more than 8 is that they actually tend to have a lot of variation, or at the least every
+predictor may have some similarity between them but also has at least one outlier that doesn't seem to fit in. The
+closest thing that ties them together is that all of them are on the lower end of `lstat` implying that these areas
+tend to be richer areas.
