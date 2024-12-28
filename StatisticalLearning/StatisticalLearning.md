@@ -75,10 +75,10 @@ that:
     Y = f(X) + \epsilon\label{eq:1}.
 \end{equation}
 
-Here $\epsilon$ is an **error term**, a random value independent of $X$, with mean zero. While $f$ is the **systematic**
+Here $\epsilon$ is an **error term**, a random value independent of $X$, with mean zero, while $f$ is the **systematic**
 information that $X$ provides about $Y$. Because $f$ takes arguments from the entire group of variables, $X$, it will
 likely be a function of many variables. Thus, **statistical learning**, is a method for estimating what $f$ might be
-based using $X$ as **training data**. That is we want to find $\hat{f}$, an estimate of $f$. Since the error term
+based using $X$ as **training data**. That is, we want to find $\hat{f}$, an estimate of $f$. Since the error term
 $\epsilon$ has mean zero, we can use $\hat{Y}$ for a prediction of $Y$:
 
 $$
@@ -174,7 +174,7 @@ regression is typically used with a two-class or binary qualitative response, an
 However, as it also estimates the class probabilities, a quantitative value, it can be seen as regression.
 
 For this purpose we are generally only concerned with the nature of the response variable rather than the input
-variables. Of course input variables can be either qualitative or quantitative, too. However in general, most methods
+variables. Of course input variables can be either qualitative or quantitative, too. However, in general, most methods
 can be applied regardless of the input variable, as long as qualitative input variables are properly **coded**.
 
 Measuring Regression Fit Quality through Mean Squared Error
@@ -311,7 +311,7 @@ $$
 1 - E(\max_{j}\Pr(Y = j|X)).
 $$
 
-### K-Nearest Neighbors
+### K-Nearest Neighbors Classification
 
 Given real data, it is generally impossible to compute the Bayes classifier since we don't actually know the conditional
 distribution of the data. But it still has some use as a standard to compare other methods against, which instead
